@@ -29,7 +29,7 @@ function offer(id){
 }
 function startGame(){
   if(busy)return;if(records!==archive)replaceArchive(archive);
-  game={...newGame(),active:true};pinned=[];$('friendship').textContent='';lastResults=[];lastQuery='';$('results').replaceChildren(text('p','The first mystery is waiting. Search or explore a room.','empty'));$('keywords').hidden=true;$('keywords').replaceChildren();$('compare').setAttribute('aria-pressed','false');$('play-status').textContent='Read a source passage, then offer the clue that explains this mystery.';$('quest-feedback').textContent='The first mystery is ready. Search or tap a room to begin.';$('ghost-message').textContent='“Five lost keepsakes. One very forgetful ghost. Shall we?”';
+  game={...newGame(),active:true};selectedRoom='Hall';ghostRoom=0;$('room-encounter').hidden=true;pinned=[];$('friendship').textContent='';lastResults=[];lastQuery='';$('results').replaceChildren(text('p','The first mystery is waiting. Search or explore a room.','empty'));$('keywords').hidden=true;$('keywords').replaceChildren();$('compare').setAttribute('aria-pressed','false');$('play-status').textContent='Read a source passage, then offer the clue that explains this mystery.';$('quest-feedback').textContent='The first mystery is ready. Search or tap a room to begin.';$('ghost-message').textContent='“Five lost keepsakes. One very forgetful ghost. Shall we?”';
   $('query').value=mysteries[0].question;drawQuest();drawPins();drawResults();drawHouse(lastResults);sound.play('welcome');
 }
 function moveGhost(){
