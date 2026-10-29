@@ -1,0 +1,1 @@
+{"name":"ghostlight-archive","version":"1.0.0","private":true,"type":"module","scripts":{"test":"node check.mjs","verify:model":"node model-check.mjs","build":"node build.mjs"},"devDependencies":{"@huggingface/transformers":"4.3.2"}}
