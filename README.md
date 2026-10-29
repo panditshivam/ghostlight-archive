@@ -11,10 +11,29 @@ license: apache-2.0
 
 # Ghostlight Archive
 
-Ask a haunted house a question and follow the matching passages. A small open
+Help Wisp, a wandering lantern-carrying ghost, recover five lost keepsakes. A small open
 embedding model searches an original fictional archive in the browser. Matching
 rooms light up; every card quotes its complete source passage. Pin clues and
 download an evidence trail, or paste your own small archive.
+
+## Play
+
+Choose **Enter the house**. Read each mystery, search it in your own words, and
+**Offer this clue to Wisp** on the passage that explains it. Recover five
+keepsakes to restore the house and reach the ending. Wrong offers do not remove
+progress. There is no timer. **Restart hunt** clears the hunt and pinned trail.
+You can also tap a room, read its encounter and explore its source passages
+without model inference. Those cards say “Room exploration” instead of a score.
+
+Wisp wanders between rooms. Greet it or use the stationary **Call Wisp** button
+for hints and a friendship badge. Visiting all six rooms earns the House historian badge. **Enable sound** starts a quiet synthesized
+ambient drone and short room, ghost and recovery motifs. Sound is off initially;
+volume and mute are available. Leaving the tab mutes it until explicitly enabled
+again. No microphone permission, audio samples or external sound files are used.
+**Pause motion** stops the ghost; reduced-motion preferences are honored.
+Custom archives end the authored hunt and retain the ordinary search tool.
+Game progress, visits and friendship live only in page memory, like the pins.
+
 
 This is retrieval, not a generative storyteller or a factual verification tool.
 Cosine similarity is not a calibrated confidence. Even an unrelated query can
@@ -44,8 +63,8 @@ worker memory; changing the archive invalidates the cache.
 ## Checks
 
 `npm ci` installs the pinned test-only dependency from the lockfile.
-`npm test` checks input bounds, ranking, finite embeddings and trail export.
-`npm run verify:model` executes the actual model on six fixed fictional queries
+`npm test` checks input bounds, ranking, finite embeddings, trail export and the ordered game state (wrong offers, duplicate clues, ending and replay).
+`npm run verify:model` executes the actual model on eight fixed fictional queries
 including an irrelevant question. It writes `model-check.json`; this is a
 functional illustration, not a held-out model benchmark. Browser WASM is checked
 separately from this CPU route. `npm run build` packages an explicit static file
@@ -57,5 +76,5 @@ App, design and fictional passages: SHIVAM DWIVEDI, Apache-2.0.
 Model: Xenova/all-MiniLM-L6-v2, Apache-2.0; based on sentence-transformers/all-MiniLM-L6-v2.
 Runtime: Hugging Face Transformers.js, Apache-2.0.
 Fonts: DM Sans and Newsreader from Google Fonts, SIL Open Font License.
-CSS noise is a generated SVG filter; no third-party image assets.
+Wisp is an original inline SVG; the map and animation are CSS. CSS noise is a generated SVG filter; no third-party image or audio assets.
 AI assisted implementation and documentation. No human usability study is claimed.

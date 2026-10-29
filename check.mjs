@@ -18,3 +18,18 @@ assert.equal(keywordRank(archive,'zzzzzz').length,0);
 assert.ok(keywordRank(archive,'radio')[0].id==='L1');
 assert.ok(exportTrail([{...archive[5],query:'radio'}]).includes(archive[5].text));
 console.log('16 functional checks passed; no model accuracy claim.');
+
+const {mysteries,newGame,offerClue}=await import('./game.mjs');
+let game=newGame();
+assert.equal(offerClue(game,'M1').outcome,'inactive');
+game={...game,active:true};
+const wrong=offerClue(game,'A1');assert.equal(wrong.outcome,'wrong');assert.deepEqual(wrong.state.solved,[]);assert.equal(wrong.state.attempts,1);assert.equal(game.attempts,0);
+for(const [i,mystery] of mysteries.entries()){
+  assert.ok(archive.some(r=>r.id===mystery.id&&r.room===mystery.room));
+  const result=offerClue(game,mystery.id);assert.equal(result.outcome,i===4?'complete':'solved');game=result.state;
+  assert.equal(game.solved.length,i+1);
+  if(i<4)assert.equal(offerClue(game,mystery.id).outcome,'duplicate');
+}
+assert.equal(offerClue(game,'M1').outcome,'inactive');assert.equal(game.attempts,5);
+assert.deepEqual(newGame().solved,[]);
+console.log('Game checks passed: ordered recovery, wrong evidence, duplicate prevention, ending, clean replay and archive IDs.');

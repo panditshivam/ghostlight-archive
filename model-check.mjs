@@ -12,6 +12,8 @@ const fixtures=[
   {query:'Where did the quiet voice behind the books come from?',expected:'L1'},
   {query:'What extinguished the flames beside the instrument?',expected:'M2'},
   {query:'Who left a light outside to help someone get home?',expected:'G1'},
+  {query:'Why was there an extra cup at the table?',expected:'K1'},
+  {query:'Why are there names beside the flowers?',expected:'G2'},
   {query:'How can I repair a rocket engine?',expected:null},
 ];
 const encoder=await pipeline('feature-extraction',MODEL,{revision:REVISION,dtype:'q8',device:'cpu'});
@@ -19,7 +21,7 @@ const vectors=(await encoder(archive.map(r=>r.text),OPTIONS)).tolist();
 assert.equal(vectors.length,12);assert.equal(vectors[0].length,384);
 const results=[];
 for(const f of fixtures){const started=performance.now();const v=(await encoder(f.query,OPTIONS)).tolist()[0];results.push({...f,semantic:semanticRank(archive,vectors,v),keyword:keywordRank(archive,f.query),seconds:(performance.now()-started)/1000});}
-const receipt={model:MODEL,revision:REVISION,runtime:'Transformers.js 4.3.2 CPU',scope:'Six fixed synthetic functional queries, including an out-of-domain query. Not held-out accuracy or browser timing.',results};
+const receipt={model:MODEL,revision:REVISION,runtime:'Transformers.js 4.3.2 CPU',scope:'Eight fixed synthetic functional queries, including an out-of-domain query. Not held-out accuracy or browser timing.',results};
 await writeFile('model-check.json',JSON.stringify(receipt,null,2)+'\n');
 console.log(JSON.stringify(results.map(r=>({query:r.query,expected:r.expected,top:r.semantic[0].id,score:r.semantic[0].score,keyword:r.keyword.map(k=>k.id)})),null,2));
 assert.deepEqual(results.filter(r=>r.expected).map(r=>r.semantic[0].id), fixtures.filter(r=>r.expected).map(r=>r.expected));
