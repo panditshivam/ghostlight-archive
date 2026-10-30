@@ -86,7 +86,11 @@ AI assisted implementation and documentation. No human usability study is claime
 
 ## Revival Relay
 
-Open `revival.html`. Inspect the fictional Marigold Room sources, ask Gemma to suggest tools or inspect the clearly labelled fixed plan, preview the three repairs and approve them. **Interrupt the worker** uses a handshake at the first write/completion boundary, sends the isolated server worker a real SIGKILL, and starts its replacement. Actual Temporal retry, verified output adoption and source-linked output hashes appear in the live thread. Without an interruption, work continues normally.
+Open `revival.html` to play **Save the Marigold Room**. Enter with synthesized sound or choose the quiet route. Investigate the torn page, guestbook and portrait by clicking the animated room or their accessible buttons. Solve the authored clue questions and collect all three memories, then choose **Restore the room** to approve its three fixed repairs. Clue collection alone does not repair files.
+
+The live room shows actual restoration progress. **Blow out the candle** appears at the first write/completion boundary. It uses an acknowledgement handshake, kills the isolated server worker with SIGKILL and starts a replacement. The candle goes out during recovery, and the ending waits for the server's verified title, visitor ledger and portrait. Without a blackout, the ending explicitly says that the run was uninterrupted. Wisp's ordinary dialogue is scripted original fiction, and the scene and music are procedural. **Ask Wisp for a clue** performs actual local Gemma matching of a player question to an allowed object. It does not generate dialogue or execute code. Model download is opt-in and is not required for the guided puzzle.
+
+Sound starts only after an explicit gesture. Mute, pause motion, reduced-motion support, keyboard object buttons, focused clue dialogs and an accessible quiet route are included. Audio suspends when the tab is hidden and needs explicit re-enabling. The technical drawer is closed by default; it contains actual workflow events, output evidence and the separately labeled precomputed review.
 
 Gemma is `onnx-community/embeddinggemma-2-ONNX`, revision `daa72c51243991dfcaf9f9137d2c573d8f7790c0`, text-only q4 through Transformers.js 4.3.2. It requires WebGPU and checks for an adapter before loading about 207 MB of model/tokenizer assets plus runtime. Gemma ranks four descriptions. Only three fixed repairs are executable; the model neither generates code nor grants authority. The fixed-plan route explicitly says when no model selected it.
 
@@ -96,6 +100,6 @@ The Node 22/Docker service source is in `revival-service/` in the GitHub reposit
 
 When configured, Sentry receives filtered workflow/tool trace metadata. It does not receive browser repair wording or archive text. Default SDK integrations are disabled; actual SDK error/trace envelopes are checked for excluded data. Hosting/network metadata still occurs, and source-address buckets enforce request limits. No server-side anonymization guarantee is made.
 
-The Ultramarine card is one **precomputed review of this fixed fixture and completed outputs**, not a new model call for each visitor and not byte verification. Its exact response, source hashes, usage and required partner run-cost disclosure are in `revival-review.json`. No inference credential is sent to the browser.
+The optional Ultramarine reference in the technical drawer is one **precomputed review of this fixed fixture and completed outputs**, not a new model call for each visitor and not byte verification. Its exact response, source hashes, usage and required partner run-cost disclosure are in `revival-review.json`. No inference credential is sent to the browser.
 
-The original Marigold Room sources and portrait use Apache-2.0. Gemma retains its model-card licence; Mastra, Temporal, Express, Zod and Sentry retain their package licences. Revival Relay fonts: DM Sans and Playfair Display, SIL Open Font License.
+The original Marigold Room sources and portrait use Apache-2.0. Gemma retains its model-card licence; Mastra, Temporal, Express, Zod and Sentry retain their package licences. The playable room uses system fonts and original Canvas2D/CSS art; no external art or audio samples.

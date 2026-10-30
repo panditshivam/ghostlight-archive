@@ -34,3 +34,9 @@ export function rankToolVectors(vectors, query) {
     return {...tool,score};
   }).sort((a,b)=>b.score-a.score);
 }
+
+// The game ending requires the exact verified exhibit, not a phase label alone.
+export function isVerifiedRoomResult(result,runId) {
+  const ids=['recover_title','upgrade_ledger','reconnect_asset'];
+  return result?.verified===true&&typeof result.page?.title==='string'&&Array.isArray(result.visitors?.records)&&result.visitors.records.every(r=>typeof r.display_name==='string'&&Number.isFinite(r.visit_count))&&Array.isArray(result.outputs)&&result.outputs.length===3&&ids.every(id=>result.outputs.some(o=>o.toolId===id))&&result.exhibitUrl===`/exhibits/${runId}`;
+}
