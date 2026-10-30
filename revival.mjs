@@ -7,6 +7,7 @@ const el=(tag,content)=>{const n=document.createElement(tag);n.textContent=conte
 const dispatcher=createRevivalDispatcher({onStatus:e=>{$('model-status').textContent=e.text;},onProgress:e=>{if(Number.isFinite(e.progress)){$('model-progress').hidden=false;$('model-progress').value=e.progress;}}});
 async function request(path,{method='GET',body,token=run?.token}={}){
   const response=await fetch(SERVICE_URL+path,{method,headers:{...(body?{'Content-Type':'application/json'}:{}),...(token?{'X-Run-Token':token}:{})},body:body?JSON.stringify(body):undefined,signal:AbortSignal.timeout(70000)});
+  if(!response.headers.get('content-type')?.includes('application/json'))throw new Error('The restoration host is waking or unavailable. Try again shortly.');
   const data=await response.json().catch(()=>({error:'The service is waking or unavailable. Try again shortly.'}));
   if(!response.ok){const messages={WARMING_UP:'The restoration service is waking. Try again shortly.',EXACT_REPAIR_PLAN_REQUIRED:'This exhibit accepts only the three displayed repairs.',ANOTHER_RESTORATION_ACTIVE:'Another visitor is restoring an exhibit. Wait a little, then approve again.',DEMO_CAPACITY_REACHED:'The demo has reached its current run limit. Please return later.',RUN_NOT_FOUND:'This run is no longer available. Reload to start a new rehearsal.',RUN_EXPIRED:'This preview expired. Reload to start a new rehearsal.',NO_INTERRUPTIBLE_WORKER:'The interruption window has closed. The existing run will continue.',INTERRUPT_NOT_ACKNOWLEDGED:'The worker could not acknowledge the interruption in time. The run will continue without a kill.',RATE_LIMITED:'Too many status requests. Wait a moment and resume status.'};throw new Error(messages[data.error]||data.message||'The restoration service could not complete that request.');}
   return data;
@@ -31,7 +32,7 @@ $('model-plan').onclick=async()=>{
 $('cancel-model').onclick=()=>dispatcher.cancel();
 $('preview').onclick=async()=>{
   $('preview').disabled=true;$('service-status').textContent='Preparing a source-bound preview. A sleeping host can take about a minute.';
-  try{const p=await request('/api/runs',{method:'POST',body:{toolIds:choices},token:null});run={id:p.id,token:p.token};previewReady=true;$('approve').disabled=false;modelState(false);$('service-status').textContent='Preview ready. The three source-bound repairs are awaiting your approval. No repair has run.';$('plan').replaceChildren(...p.preview.map(t=>el('li',t.description)));$('phase').textContent='PREVIEW';}
+  try{const p=await request('/api/runs',{method:'POST',body:{toolIds:choices},token:null});if(typeof p.id!=='string'||typeof p.token!=='string'||!Array.isArray(p.preview))throw new Error('The service did not return a valid preview. No repair was approved.');run={id:p.id,token:p.token};previewReady=true;$('approve').disabled=false;modelState(false);$('service-status').textContent='Preview ready. The three source-bound repairs are awaiting your approval. No repair has run.';$('plan').replaceChildren(...p.preview.map(t=>el('li',t.description)));$('phase').textContent='PREVIEW';}
   catch(e){$('service-status').textContent=e.message;$('preview').disabled=false;}
 };
 $('approve').onclick=async()=>{
