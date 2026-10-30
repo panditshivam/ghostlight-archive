@@ -8,7 +8,7 @@ import {fileURLToPath} from 'node:url';
 import {Connection,Client} from '@temporalio/client';
 import {materializeRepair,toolVersion} from './repair-tools.mjs';
 import {SOURCE_FILES,TOOL_IDS,DESCRIPTIONS,hash,json,validateTools,DATA_NOTICE} from './contract.mjs';
-import {initTelemetry,trace,traceCarrier,failure,flush} from './telemetry.mjs';
+import {initTelemetry,trace,newJobTrace,traceCarrier,failure,flush} from './telemetry.mjs';
 const here=fileURLToPath(new URL('.',import.meta.url));
 const dataRoot=resolve(process.env.DATA_DIR||join(here,'.data'));
 const port=Number(process.env.PORT||8080),host=process.env.HOST||'0.0.0.0';
@@ -70,14 +70,14 @@ async function execute(job){
    job.handle=await client.workflow.start('revival',{taskQueue:'ghostlight-revival',workflowId:job.id,args:[{runId:job.id,toolIds:job.toolIds,toolVersion,inputHashes:job.inputHashes,trace:carrier}],workflowExecutionTimeout:'180 seconds'});
    deadline=setTimeout(()=>job.handle.terminate('BOUND_REACHED').catch(()=>{}),185000);
    const result=await job.handle.result();await finish(job,result);
-  });
+  },job.traceCarrier);
  }catch{job.phase='failed';job.error='RESTORATION_FAILED';await event(job,'failed',{code:'RESTORATION_FAILED'});failure();}
  finally{clearTimeout(deadline);await stopChild(worker);worker=null;if(active===job.id)active=null;await flush();}
 }
 app.post('/api/runs/:id/approve',guard,async(req,res)=>{
  const job=req.job;if(!req.body||req.body.approved!==true||Object.keys(req.body).some(k=>k!=='approved'))return res.status(400).json({error:'EXPLICIT_APPROVAL_REQUIRED'});
  if(job.phase!=='preview')return res.json(await snapshot(job));if(active)return res.status(409).json({error:'ANOTHER_RESTORATION_ACTIVE'});if(job.expiresAt<Date.now())return res.status(410).json({error:'RUN_EXPIRED'});
- active=job.id;job.phase='starting';await trace('revival.approval',{phase:'approved'},()=>event(job,'approved'));void execute(job);res.status(202).json(await snapshot(job));
+ active=job.id;job.phase='starting';await newJobTrace(async()=>{await trace('revival.approval',{phase:'approved'},async()=>{job.traceCarrier=traceCarrier();await event(job,'approved');});void execute(job);});res.status(202).json(await snapshot(job));
 });
 app.get('/api/runs/:id',guard,async(req,res)=>res.json(await snapshot(req.job)));
 app.post('/api/runs/:id/interrupt',guard,async(req,res)=>{

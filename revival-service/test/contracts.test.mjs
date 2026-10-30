@@ -19,3 +19,21 @@ test('actual SDK transport receives sanitized error and trace envelopes',async()
  await flush();assert(envelopes.length>=2);const encoded=JSON.stringify(envelopes);assert(!encoded.includes('PRIVATE_SENTINEL'));assert(encoded.includes('revival.repair'));assert(encoded.includes('recover_title'));
  await Sentry.close();delete process.env.SENTRY_DSN;
 });
+test('separate jobs have new traces while approval, workflow and later events stay correlated',async()=>{
+ const Sentry=await import('@sentry/node');const {initTelemetry,newJobTrace,trace,traceCarrier,flush}=await import('../telemetry.mjs');
+ const envelopes=[],jobs=[];process.env.SENTRY_DSN='https://public@example.invalid/1';
+ initTelemetry({transport:()=>({send:async envelope=>{envelopes.push(envelope);return{statusCode:200}},flush:async()=>true})});
+ for(let index=0;index<2;index++){
+  const job={};await newJobTrace(async()=>{
+   await trace('revival.approval',{phase:'approved'},async()=>{job.approval=traceCarrier();});
+   await trace('revival.workflow',{'gen_ai.agent.name':'ghostlight-revival'},async()=>{job.workflow=traceCarrier();await trace('revival.repair',{tool_id:'recover_title',attempt:1},async()=>{});},job.approval);
+  });jobs.push(job);
+ }
+ for(const job of jobs)await trace('revival.worker_exit',{controlled_fault:true},async()=>{},job.workflow);
+ await flush();const id=carrier=>carrier.sentryTrace.split('-')[0];assert.notEqual(id(jobs[0].approval),id(jobs[1].approval));
+ for(const job of jobs)assert.equal(id(job.approval),id(job.workflow));
+ const transactions=envelopes.flatMap(envelope=>envelope[1].filter(item=>item[0].type==='transaction').map(item=>item[1]));
+ assert.equal(new Set(transactions.map(event=>event.contexts.trace.trace_id)).size,2);
+ for(const job of jobs){const names=transactions.filter(event=>event.contexts.trace.trace_id===id(job.approval)).map(event=>event.transaction);assert(names.includes('revival.approval'));assert(names.includes('revival.workflow'));assert(names.includes('revival.worker_exit'));}
+ await Sentry.close();delete process.env.SENTRY_DSN;
+});

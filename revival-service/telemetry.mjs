@@ -11,6 +11,7 @@ export function initTelemetry(options={}){
  Sentry.init({dsn:process.env.SENTRY_DSN,defaultIntegrations:false,sendDefaultPii:false,tracesSampleRate:1,traceLifecycle:'static',...(options.transport?{transport:options.transport}:{}),beforeSend:sanitizeEvent,beforeSendTransaction:event=>({type:'transaction',event_id:event.event_id,timestamp:event.timestamp,start_timestamp:event.start_timestamp,transaction:fixedNames.has(event.transaction)?event.transaction:'revival.workflow',contexts:{trace:{trace_id:event.contexts?.trace?.trace_id,span_id:event.contexts?.trace?.span_id,op:event.contexts?.trace?.op||'revival.workflow',status:event.contexts?.trace?.status,data:sanitizeAttributes(event.contexts?.trace?.data)}},spans:(event.spans||[]).map(cleanSpan)}),beforeSendSpan:Sentry.withStaticSpan(cleanSpan)});
 }
 export async function trace(name,attributes,fn,carrier){const run=()=>Sentry.startSpan({name,op:['revival.repair','revival.retry'].includes(name)?'gen_ai.execute_tool':'gen_ai.invoke_agent',attributes:sanitizeAttributes(attributes)},fn);return carrier?Sentry.continueTrace(carrier,run):run();}
+export const newJobTrace=fn=>Sentry.startNewTrace(fn);
 export const traceCarrier=()=>{const data=Sentry.getTraceData();return {sentryTrace:data['sentry-trace'],baggage:undefined};};
 export function recordAttributes(data){Sentry.getActiveSpan()?.setAttributes(sanitizeAttributes(data));}
 export const failure=()=>Sentry.captureMessage('revival.failure','error');
