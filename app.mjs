@@ -1,5 +1,5 @@
 import {archive,rooms,examples} from './archive.mjs';
-import {mysteries,newGame,offerClue} from './game.mjs';
+import {mysteries,newGame,offerClue,currentMystery} from './game.mjs';
 import {Soundscape} from './audio.mjs';
 import {parseArchive,validateQuery,keywordRank,exportTrail} from './core.mjs';
 const $=id=>document.getElementById(id);
@@ -8,10 +8,10 @@ let game=newGame(),selectedRoom='Hall',ghostRoom=0,motionPaused=matchMedia('(pre
 const sound=new Soundscape((message,on)=>{$('sound-status').textContent=message;$('sound').textContent=on?'Mute sound':'Enable sound';$('sound').setAttribute('aria-pressed',String(on));});
 const encounters={Hall:'The portrait’s eyes seem to follow you. Wisp waves at it. The portrait does not wave back.', 'Music room':'Three notes hang in the air. Dusty keys, a candle, and something brass beneath the bench.',Attic:'Tap. Tap. Tap. Something up here has excellent rhythm and terrible timing.',Kitchen:'The kettle is quiet. Two cups wait beside a single chair.',Garden:'The gate creaks. Marigolds gather around a table covered in little name cards.',Library:'A whisper slips between the shelves. One book is much heavier than it ought to be.'};
 function drawQuest(){
-  const complete=game.solved.length===mysteries.length,current=mysteries[game.solved.length];
+  const complete=game.solved.length===mysteries.length,current=currentMystery(game);
   $('quest-play').hidden=!game.active;$('start').hidden=game.active;
   $('quest-title').textContent=complete?'Every ghost needs a good ending.':game.active?current.title:'The house forgot its ending.';
-  $('progress-text').textContent=`${game.solved.length} / 5 keepsakes`;$('progress').value=game.solved.length;
+  $('progress-text').textContent=`${game.mode==='shuffle'?'Shuffled hunt · ':''}${game.solved.length} / 5 keepsakes`;$('progress').value=game.solved.length;
   $('inventory').replaceChildren(...mysteries.map(m=>{const found=game.solved.includes(m.id),e=text('div','','keepsake'+(found?' recovered':''));e.append(text('span',found?m.symbol:'◇'),text('small',found?m.item:'Not found'));return e;}));
   $('riddle').textContent=complete?'The lanterns are warm again. Wisp sets the cup beside the flowers and opens the unfinished letter. “Stay for a story?” You recovered all five keepsakes.':current.question;
   $('ask-riddle').hidden=$('hint').hidden=complete;
@@ -19,18 +19,18 @@ function drawQuest(){
   document.body.classList.toggle('restored',complete);document.body.classList.toggle('playing',game.active);$('current-mystery').hidden=!game.active;$('play-status').hidden=!game.active;$('current-mystery').textContent=complete?'All five keepsakes recovered. The house remembers.':`Mystery ${game.solved.length+1} of 5 · ${current.title}: ${current.question}`;
 }
 function offer(id){
-  const mystery=mysteries[game.solved.length],result=offerClue(game,id);game=result.state;
+  const mystery=currentMystery(game),result=offerClue(game,id);game=result.state;
   if(result.outcome==='wrong'){$('quest-feedback').textContent='An interesting lead, but it does not explain this mystery. Read what happened in the passage, or ask Wisp for a hint.';$('play-status').textContent=$('quest-feedback').textContent;sound.play('wrong');return;}
   if(!['solved','complete'].includes(result.outcome))return;
   const record=archive.find(r=>r.id===id);if(!pinned.some(p=>p.id===id))pinned.push({...record,query:lastQuery||mystery.question});
   $('ghost-message').textContent=mystery.reply;$('quest-feedback').textContent=`Recovered: ${mystery.item}. ${result.outcome==='complete'?'All five memories are home.':'A new mystery is ready above.'}`;
-  $('play-status').textContent=$('quest-feedback').textContent;if(result.outcome!=='complete')$('query').value=mysteries[game.solved.length].question;
+  $('play-status').textContent=$('quest-feedback').textContent;if(result.outcome!=='complete')$('query').value=currentMystery(game).question;
   sound.play(result.outcome==='complete'?'complete':'found');drawQuest();drawPins();drawResults();drawHouse(lastResults);
 }
-function startGame(){
+function startGame(mode='story'){
   if(busy)return;if(records!==archive)replaceArchive(archive);
-  game={...newGame(),active:true};selectedRoom='Hall';ghostRoom=0;$('room-encounter').hidden=true;pinned=[];$('friendship').textContent='';lastResults=[];lastQuery='';$('results').replaceChildren(text('p','The first mystery is waiting. Search or explore a room.','empty'));$('keywords').hidden=true;$('keywords').replaceChildren();$('compare').setAttribute('aria-pressed','false');$('play-status').textContent='Read a source passage, then offer the clue that explains this mystery.';$('quest-feedback').textContent='The first mystery is ready. Search or tap a room to begin.';$('ghost-message').textContent='“Five lost keepsakes. One very forgetful ghost. Shall we?”';
-  $('query').value=mysteries[0].question;drawQuest();drawPins();drawResults();drawHouse(lastResults);sound.play('welcome');
+  game={...newGame(mode),active:true};selectedRoom='Hall';ghostRoom=0;$('room-encounter').hidden=true;pinned=[];$('friendship').textContent='';lastResults=[];lastQuery='';$('results').replaceChildren(text('p','The first mystery is waiting. Search or explore a room.','empty'));$('keywords').hidden=true;$('keywords').replaceChildren();$('compare').setAttribute('aria-pressed','false');$('play-status').textContent='Read a source passage, then offer the clue that explains this mystery.';$('quest-feedback').textContent='The first mystery is ready. Search or tap a room to begin.';$('ghost-message').textContent=mode==='shuffle'?'“Same house. The memories have wandered. Let’s find them in a different order.”':'“Five lost keepsakes. One very forgetful ghost. Shall we?”';
+  $('query').value=currentMystery(game).question;drawQuest();drawPins();drawResults();drawHouse(lastResults);sound.play('welcome');
 }
 function moveGhost(){
   $('ghost').hidden=records!==archive;const positions=[[3,19],[53,19],[3,47],[53,47],[3,76],[53,76]];
@@ -39,7 +39,7 @@ function moveGhost(){
 }
 function greetGhost(){
   game={...game,ghostGreetings:Math.min(3,game.ghostGreetings+1)};sound.play('ghost');
-  $('ghost-message').textContent=game.ghostGreetings===3?'“You keep saying hello. That means we’re friends now. Officially. I made a badge.”':game.active&&game.solved.length<5?`“${mysteries[game.solved.length].hint}”`:'“I tried being frightening once. Someone offered me a blanket.”';
+  $('ghost-message').textContent=game.ghostGreetings===3?'“You keep saying hello. That means we’re friends now. Officially. I made a badge.”':game.active&&game.solved.length<5?`“${currentMystery(game).hint}”`:'“I tried being frightening once. Someone offered me a blanket.”';
   $('friendship').textContent=game.ghostGreetings===3?'✧ Friend of Wisp':'';
 }
 function updateMotion(){document.body.classList.toggle('still',motionPaused);$('motion').textContent=motionPaused?'Resume motion':'Pause motion';$('motion').setAttribute('aria-pressed',String(motionPaused));}
@@ -67,7 +67,7 @@ function drawResults(){
   }));
 }
 function keywords(){const found=keywordRank(records,lastQuery);$('keywords').replaceChildren(text('h3','Literal word overlap · no model'),...found.map(r=>text('p',`[${r.id}] ${r.title} — ${r.score} shared word${r.score>1?'s':''}`)));if(!found.length)$('keywords').append(text('p','No matching words after the small stop-word filter.'));}
-function setBusy(value){busy=value;$('query').readOnly=value;for(const id of ['submit','load','reset','start','restart','ask-riddle','inspect-room'])$(id).disabled=value;for(const b of $('examples').querySelectorAll('button'))b.disabled=value;}
+function setBusy(value){busy=value;$('query').readOnly=value;for(const id of ['submit','load','reset','start','restart','shuffle','ask-riddle','inspect-room'])$(id).disabled=value;for(const b of $('examples').querySelectorAll('button'))b.disabled=value;}
 worker.onmessage=({data})=>{
   if(data.requestId!==requestId)return;
   if(data.type==='status'){$('status').textContent=data.text;return;}
@@ -85,9 +85,10 @@ $('load').onclick=()=>{try{replaceArchive(parseArchive($('archive').value));$('a
 $('reset').onclick=()=>{replaceArchive(archive);$('archive').value='';$('archive-status').textContent='Fictional haunted house restored.';};
 $('clear').onclick=()=>{pinned=[];drawPins();drawResults();};
 $('export').onclick=()=>{const body=exportTrail(pinned);$('trail-preview').textContent=body;$('trail-preview').hidden=false;const url=URL.createObjectURL(new Blob([body],{type:'text/markdown'}));const a=document.createElement('a');a.href=url;a.download='ghostlight-trail.md';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);};
-$('start').onclick=$('restart').onclick=startGame;
-$('ask-riddle').onclick=()=>{if(busy)return;$('query').value=mysteries[game.solved.length].question;$('search').requestSubmit();};
-$('hint').onclick=()=>{$('quest-feedback').textContent=mysteries[game.solved.length].hint;};
+$('start').onclick=()=>startGame();$('restart').onclick=()=>startGame(game.mode);
+$('shuffle').onclick=()=>startGame('shuffle');
+$('ask-riddle').onclick=()=>{if(busy)return;$('query').value=currentMystery(game).question;$('search').requestSubmit();};
+$('hint').onclick=()=>{$('quest-feedback').textContent=currentMystery(game).hint;};
 $('inspect-room').onclick=()=>{if(busy)return;lastResults=records.filter(r=>r.room===selectedRoom);lastQuery=`Explored the ${selectedRoom}`;drawResults();drawHouse(lastResults);$('keywords').replaceChildren();$('keywords').hidden=true;$('compare').setAttribute('aria-pressed','false');$('status').textContent=`Reading ${selectedRoom} passages directly. This is exploration, not model retrieval.`;};
 $('ghost').onclick=$('call-ghost').onclick=greetGhost;
 $('sound').onclick=async()=>{$('sound').disabled=true;try{await sound.toggle();}finally{$('sound').disabled=false;}};$('volume').oninput=e=>sound.setVolume(e.target.value/100);

@@ -22,6 +22,9 @@ Choose **Enter the house**. Read each mystery, search it in your own words, and
 **Offer this clue to Wisp** on the passage that explains it. Recover five
 keepsakes to restore the house and reach the ending. Wrong offers do not remove
 progress. There is no timer. **Restart hunt** clears the hunt and pinned trail.
+**New shuffled hunt** changes the order of all five mysteries for a fresh replay.
+Hints, search prompts and clue checking follow that order; **Restart hunt** retains
+the chosen mode. It remixes the existing mysteries, rather than generating new ones.
 You can also tap a room, read its encounter and explore its source passages
 without model inference. Those cards say “Room exploration” instead of a score.
 

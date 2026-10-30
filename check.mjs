@@ -33,3 +33,22 @@ for(const [i,mystery] of mysteries.entries()){
 assert.equal(offerClue(game,'M1').outcome,'inactive');assert.equal(game.attempts,5);
 assert.deepEqual(newGame().solved,[]);
 console.log('Game checks passed: ordered recovery, wrong evidence, duplicate prevention, ending, clean replay and archive IDs.');
+
+const {currentMystery}=await import('./game.mjs');
+for(const random of [()=>0,()=>0.999,()=>0.5]){
+  let replay={...newGame('shuffle',random),active:true};
+  assert.equal(new Set(replay.order).size,5);
+  assert.deepEqual([...replay.order].sort(),mysteries.map(m=>m.id).sort());
+  assert.notDeepEqual(replay.order,mysteries.map(m=>m.id));
+  for(let i=0;i<5;i++){
+    const id=currentMystery(replay).id;
+    const wrongId=replay.order.find(x=>x!==id&&!replay.solved.includes(x));
+    if(wrongId)assert.equal(offerClue(replay,wrongId).outcome,'wrong');
+    const result=offerClue(replay,id);replay=result.state;
+    assert.equal(result.outcome,i===4?'complete':'solved');
+    if(i<4)assert.equal(offerClue(replay,id).outcome,'duplicate');
+  }
+  assert.equal(currentMystery(replay),undefined);
+  assert.equal(newGame(replay.mode,random).mode,'shuffle');
+}
+console.log('Shuffled replay checks passed: unique permutation, changed order, matching hints/clues, ending and mode.');
