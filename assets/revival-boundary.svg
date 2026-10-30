@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="920" viewBox="0 0 1440 920" role="img" aria-labelledby="title desc">
+<title id="title">The write survived. The worker did not.</title>
+<desc id="desc">Mechanism illustration of an output written before Activity completion, worker death, Temporal retry, and verified output adoption. A conflicting output stops the repair. Arrows do not represent elapsed time.</desc>
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10" fill="none" stroke="#bde7d4" stroke-width="2"/></marker><marker id="redarrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10" fill="none" stroke="#f2a599" stroke-width="2"/></marker></defs>
+<rect width="1440" height="920" fill="#10212b"/>
+<g font-family="Arial, sans-serif">
+<text x="72" y="60" fill="#bde7d4" font-size="19" letter-spacing="3">GHOSTLIGHT / MECHANISM ILLUSTRATION</text>
+<text x="72" y="123" fill="#fff2d9" font-size="47" font-weight="700">The write survived. The worker did not.</text>
+<text x="72" y="167" fill="#a5b9bd" font-size="24">A retry must inspect the effect that may already exist.</text>
+<g fill="#182f3b" stroke="#486371" stroke-width="2"><rect x="72" y="213" width="382" height="229" rx="18"/><rect x="526" y="213" width="382" height="229" rx="18"/><rect x="980" y="213" width="382" height="229" rx="18"/></g>
+<g font-size="20" fill="#bde7d4"><text x="98" y="250">WORKER A / FIRST ATTEMPT</text><text x="552" y="250">PERSISTED OUTPUT</text><text x="1006" y="250">TEMPORAL SERVICE</text></g>
+<text x="98" y="302" fill="#fff2d9" font-size="31" font-weight="700">Writes page.json</text><text x="98" y="344" fill="#c6d4d6" font-size="23">Then waits before returning</text><text x="98" y="398" fill="#f2a599" font-size="27" font-weight="700">SIGKILL: process exits</text>
+<text x="552" y="302" fill="#fff2d9" font-size="31" font-weight="700">Title is on disk</text><text x="552" y="344" fill="#c6d4d6" font-size="23">Output bytes have survived</text><text x="552" y="398" fill="#c6d4d6" font-size="23">Completion is unreported</text>
+<text x="1006" y="302" fill="#fff2d9" font-size="31" font-weight="700">Heartbeat expires</text><text x="1006" y="344" fill="#c6d4d6" font-size="23">Schedules another attempt</text><text x="1006" y="398" fill="#c6d4d6" font-size="23">Same workflow, new worker</text>
+<path d="M462 318 H512" stroke="#bde7d4" stroke-width="3" marker-end="url(#arrow)"/><path d="M916 318 H966" stroke="#bde7d4" stroke-width="3" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+<path d="M1171 453 V484 H720 V524" stroke="#bde7d4" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<rect x="308" y="541" width="824" height="139" rx="18" fill="#233d43" stroke="#bde7d4" stroke-width="2"/>
+<text x="720" y="580" text-anchor="middle" font-size="20" fill="#bde7d4">WORKER B / REPLACEMENT ATTEMPT</text><text x="720" y="628" text-anchor="middle" font-size="30" font-weight="700" fill="#fff2d9">Compare existing bytes with approved expected output</text><text x="720" y="660" text-anchor="middle" font-size="21" fill="#c6d4d6">Recheck input hashes and tool version before any effect</text>
+<path d="M512 691 V724" stroke="#bde7d4" stroke-width="3" marker-end="url(#arrow)"/><path d="M928 691 V724" stroke="#f2a599" stroke-width="3" marker-end="url(#redarrow)"/>
+<rect x="199" y="741" width="610" height="92" rx="15" fill="#20453c"/><rect x="839" y="741" width="403" height="92" rx="15" fill="#493738"/>
+<text x="504" y="779" text-anchor="middle" fill="#c7f0d8" font-size="25" font-weight="700">MATCH → Adopt it; continue</text><text x="504" y="813" text-anchor="middle" fill="#c7dcd4" font-size="21">The title is not written again</text>
+<text x="1040" y="779" text-anchor="middle" fill="#ffd0c7" font-size="25" font-weight="700">CONFLICT → Refuse</text><text x="1040" y="813" text-anchor="middle" fill="#e8c6c0" font-size="21">Do not overwrite the difference</text>
+<text x="72" y="889" fill="#a5b9bd" font-size="18">Original diagram • arrows show control flow, not elapsed time • one tested failure boundary, not a universal guarantee</text>
+</g></svg>

@@ -12,3 +12,5 @@
 .ghost-chat .exploration{font:10px 'DM Sans',sans-serif;color:var(--muted);min-height:0;margin:12px 0 0}
 .playing:not(.restored) #quest-story{display:none}.playing .quest-actions button{font-size:11px;padding:8px 11px}.playing .quest-progress{margin:10px 0}.playing .riddle{margin:12px 0}.playing .quest h2{margin:8px 0}
 @media(max-width:500px){.playing .quest{padding:16px}.playing .quest h2{font-size:25px}.playing .quest-actions{gap:5px}.playing .quest-actions button{font-size:10px;padding:8px}.playing .keepsake{padding:5px 2px}.playing .keepsake>span{font-size:20px}.playing .riddle{font-size:20px}.playing .controls button{font-size:10px;padding:7px 8px}.playing .volume{font-size:9px}.playing #sound-status{font-size:9px}.playing .controls{gap:7px}.playing .controls input{width:60px}}
+
+.revival-link{display:inline-block;padding:11px 18px;border:1px solid #d8bb82;border-radius:4px;color:#f0cf96;font-weight:600;text-decoration:none}.revival-link:focus-visible{outline:2px solid #f0cf96;outline-offset:4px}

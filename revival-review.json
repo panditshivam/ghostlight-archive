@@ -1,0 +1,82 @@
+{
+  "format": "ghostlight-fixed-review-v1",
+  "label": "Precomputed review of the fixed original fictional exhibit. Not live per-visitor verification.",
+  "model": "ultramarine-1-flash",
+  "provider": "Paper Instruments",
+  "actual_cost_usd": "0.00056985",
+  "cost_note": "Computed from actual returned usage and the official current price card; included solely because the partner category requires actual run cost disclosure.",
+  "reasoning_effort": "low",
+  "calls": 1,
+  "usage": {
+    "prompt_tokens": 1589,
+    "completion_tokens": 663,
+    "total_tokens": 2252,
+    "prompt_tokens_details": {
+      "cached_tokens": 0
+    },
+    "completion_tokens_details": {
+      "reasoning_tokens": 20
+    }
+  },
+  "review": {
+    "summary": "All six claims check out against the supplied fixture, code, and completed outputs, with one caveat: I cannot recompute the SHA-256 of the SVG here, so hash matching is taken from the supplied artifact and noted as needing byte-level verification. Minor hygiene issues exist (assert failure exposes raw errors, filename regex excludes dots/underscores, ingest hashes are unverifiable from supplied data).",
+    "checks": [
+      {
+        "claim": "The recovered title matches the heading of the original source.",
+        "verdict": "supported",
+        "reason": "source_markdown contains 'The Marigold Room' as the only '# ' heading; regex recovers exactly that, and completed page.json matches."
+      },
+      {
+        "claim": "The visitor migration preserves the two fictional display names and visit counts in the stated schema.",
+        "verdict": "supported",
+        "reason": "legacy_visitors {Asha:3, Mira:1} map field-for-field to schema_version 2 records with display_name/visit_count; completed visitors.json matches, no additions or loss."
+      },
+      {
+        "claim": "The restored portrait reference names the packaged original SVG and records its content hash.",
+        "verdict": "supported",
+        "reason": "asset.json points to marigold-portrait.svg (matching asset_inventory, not broken old-images/portrait.svg) and records sha256 43e7...5e, identical to approved_plan input hash. Byte-verification is delegated to the application's hash check."
+      },
+      {
+        "claim": "The public contract allows only the three approved repair tool IDs; a pure-helper branch alone does not authorize an additional tool.",
+        "verdict": "supported",
+        "reason": "public_allowed_tools_contract exposes TOOL_IDS=['recover_title','upgrade_ledger','reconnect_asset'] and validateTools enforces exactly these three; public repair code's shared hash/json helpers are pure utilities, and its materializeRepair throws on any other toolId."
+      },
+      {
+        "claim": "Reviewing these pure functions and outputs cannot establish durable Temporal retry behavior or universal exactly-once execution.",
+        "verdict": "supported",
+        "reason": "Nothing supplied demonstrates durability guarantees; the pure functions are deterministic for finite inputs, but retry/persistence semantics are outside the evidence. DATA_NOTICE also states runs are lost on restart."
+      },
+      {
+        "claim": "This is a precomputed second opinion on a fixed synthetic exhibit, not live per-visitor verification or proof that arbitrary software can be repaired.",
+        "verdict": "supported",
+        "reason": "Input scope, execution_scope, and authorized_plan restrict review to the packaged fictional exhibit; no live visitor processing is present or verified."
+      }
+    ],
+    "risk": [
+      "Output hash equality with the ingest-side plan hash is copied text here; only the application's byte-level hash check is authoritative.",
+      "Errors surface via node:assert, which exposes internal details to callers; explicit validation would be cleaner.",
+      "Filename regex rejects valid basenames (underscores, dots) though fine for this fixture.",
+      "No round-trip check that legacy counts are non-negative (Number.isInteger permits negative values)."
+    ],
+    "scope": "Static review of the supplied fixture, source markdown, SVG text, public repair/contract code, approved plan, and completed local outputs only. No running system, filesystem, network, or hash computation was executed; byte/hash checks by the application remain authoritative. Not a security certification."
+  },
+  "source_hashes": {
+    "fixture.json": "d7929069c9af0d18a03bcc96c1b152fdb5686fd718a32b65c289caa0bd49f94b",
+    "source.md": "6e790d85337a176d9900adb20206094229de5351912027cdec8f48e6559e28a7",
+    "marigold-portrait.svg": "43e739fbc13e705f0d9fbf0d520807f753043bfd351cb7d78f2b2fc051c7b45e"
+  },
+  "tool_version": "fixture-repairs-v1",
+  "scope": "Only the packaged fictional source, allowed-tool contract, pure repair code, approved plan and completed local outputs were supplied. No user archive, private plans, secrets, external tools or web search.",
+  "authority": "A model second opinion. Deterministic input/output byte checks remain authoritative. No generic software repair or exactly-once guarantee.",
+  "reviewed_code_sha256": {
+    "repair_tools": "1e0b762d89b9eb78b5cfd46f32a3ac1a52b9dc16d821d1b63a16378e6293d9e7",
+    "public_allowed_tools_contract": "92aab515c6dff8038f4ae1b58d0e0f270732c087b58989fe7cf677e9bef5cf44"
+  },
+  "author_corrections": [],
+  "author_validation_notes": [
+    "The exact supplied snapshot contains only the three approved repair branches; the allowed-tool contract independently rejects other IDs.",
+    "The negative-count observation is a limitation if this helper is generalized. A direct pure-function check permits a negative integer, but the fixed original visitor records have positive counts.",
+    "Source and output hashes are computed by the application. This model response did not run a filesystem, Temporal service, worker or hash tool, and cannot establish recovery or exactly-once execution.",
+    "The model response is preserved as one precomputed review of its named source/code snapshot. It is not a fresh review of every visitor action or deployment revision."
+  ]
+}

@@ -11,6 +11,8 @@ license: apache-2.0
 
 # Ghostlight Archive
 
+[Open the Revival Relay](revival.html): restore a forgotten exhibit, interrupt its actual worker and inspect its replacement finishing the repairs. The original Wisp mystery remains below.
+
 Help Wisp, a wandering lantern-carrying ghost, recover five lost keepsakes. A small open
 embedding model searches an original fictional archive in the browser. Matching
 rooms light up; every card quotes its complete source passage. Pin clues and
@@ -81,3 +83,19 @@ Runtime: Hugging Face Transformers.js, Apache-2.0.
 Fonts: DM Sans and Newsreader from Google Fonts, SIL Open Font License.
 Wisp is an original inline SVG; the map and animation are CSS. CSS noise is a generated SVG filter; no third-party image or audio assets.
 AI assisted implementation and documentation. No human usability study is claimed.
+
+## Revival Relay
+
+Open `revival.html`. Inspect the fictional Marigold Room sources, ask Gemma to suggest tools or inspect the clearly labelled fixed plan, preview the three repairs and approve them. **Interrupt the worker** uses a handshake at the first write/completion boundary, sends the isolated server worker a real SIGKILL, and starts its replacement. Actual Temporal retry, verified output adoption and source-linked output hashes appear in the live thread. Without an interruption, work continues normally.
+
+Gemma is `onnx-community/embeddinggemma-2-ONNX`, revision `daa72c51243991dfcaf9f9137d2c573d8f7790c0`, text-only q4 through Transformers.js 4.3.2. It requires WebGPU and checks for an adapter before loading about 207 MB of model/tokenizer assets plus runtime. Gemma ranks four descriptions. Only three fixed repairs are executable; the model neither generates code nor grants authority. The fixed-plan route explicitly says when no model selected it.
+
+The API accepts finite tool IDs and explicit approval. Repair wording and vectors stay in the browser. A real Temporal workflow runs Mastra typed tools to recover an original heading, migrate a fictional ledger and reconnect an original SVG. No uploaded archives, arbitrary paths, shell commands or outside URLs are accepted. A completed synthetic exhibit is public at its random URL; it contains no visitor data or run token. Download its recovery capsule to keep the result.
+
+The Node 22/Docker service source is in `revival-service/` in the GitHub repository. Its internal Temporal ports bind only to loopback. The demo has ephemeral storage, one active restoration, a 20-second interruption window and a 180-second workflow bound. Child-worker recovery does not imply recovery after losing the entire instance, service process or disk. Free hosting may sleep; expired runs must be recreated.
+
+When configured, Sentry receives filtered workflow/tool trace metadata. It does not receive browser repair wording or archive text. Default SDK integrations are disabled; actual SDK error/trace envelopes are checked for excluded data. Hosting/network metadata still occurs, and source-address buckets enforce request limits. No server-side anonymization guarantee is made.
+
+The Ultramarine card is one **precomputed review of this fixed fixture and completed outputs**, not a new model call for each visitor and not byte verification. Its exact response, source hashes, usage and required partner run-cost disclosure are in `revival-review.json`. No inference credential is sent to the browser.
+
+The original Marigold Room sources and portrait use Apache-2.0. Gemma retains its model-card licence; Mastra, Temporal, Express, Zod and Sentry retain their package licences. Revival Relay fonts: DM Sans and Playfair Display, SIL Open Font License.
