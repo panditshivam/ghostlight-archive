@@ -1,0 +1,8 @@
+node_modules/
+.workflow-bundle.cjs
+.data/
+proof-*.json
+
+.env
+.env.*
+*.log
