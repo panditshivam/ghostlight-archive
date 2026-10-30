@@ -1,4 +1,5 @@
 import express from 'express';
+import net from 'node:net';
 import {spawn} from 'node:child_process';
 import {readFile,writeFile,mkdir,appendFile,rm,copyFile} from 'node:fs/promises';
 import {randomBytes,randomUUID,timingSafeEqual} from 'node:crypto';
@@ -23,7 +24,10 @@ async function stopChild(child,signal='SIGTERM'){
  child.kill(signal);const result=await Promise.race([ended,delay(4000).then(()=>null)]);
  if(result)return result;child.kill('SIGKILL');return ended;
 }
+// Refuse occupied private ports instead of attaching to another service.
+for(const reserved of [17433,18234,19234])await new Promise((resolve,reject)=>{const probe=net.createServer();probe.once('error',()=>reject(new Error('RESERVED_LOCAL_PORT_BUSY')));probe.listen({host:'127.0.0.1',port:reserved,exclusive:true},()=>probe.close(resolve));});
 const temporal=startChild(process.env.TEMPORAL_BIN||'temporal',['server','start-dev','--headless','--ip','127.0.0.1','--port','17433','--http-port','18234','--metrics-port','19234','--db-filename',join(dataRoot,'temporal.sqlite')]);
+temporal.on('exit',()=>{ready=false;if(!closing){console.error('Temporal child stopped');void shutdown().finally(()=>process.exit(1));}});
 const app=express();app.disable('x-powered-by');app.set('trust proxy',1);
 app.use((req,res,next)=>{
  res.set('X-Content-Type-Options','nosniff');res.set('Cache-Control','no-store');
@@ -93,6 +97,7 @@ app.get('/exhibits/:id',(req,res)=>{
 });
 app.use((err,req,res,next)=>res.status(err?.type==='entity.too.large'?413:400).json({error:'INVALID_REQUEST'}));
 const server=app.listen(port,host,()=>console.log('Ghostlight restoration API listening'));
-try{for(let i=0;i<60&&!ready;i++){try{connection=await Connection.connect({address:'127.0.0.1:17433',connectTimeout:'1 second'});await connection.workflowService.getSystemInfo({});client=new Client({connection,namespace:'default'});ready=true;}catch{await delay(250);}}if(!ready)throw Error('TEMPORAL_UNAVAILABLE');}catch{console.error('Temporal service unavailable');await shutdown();process.exitCode=1;}
+server.on('error',()=>void shutdown().finally(()=>process.exit(1)));
+try{for(let i=0;i<60&&!ready;i++){try{connection=await Connection.connect({address:'127.0.0.1:17433',connectTimeout:'1 second'});await connection.workflowService.getSystemInfo({});if(temporal.spawnFailed||temporal.exitCode!==null||temporal.signalCode!==null)throw Error('TEMPORAL_CHILD_UNAVAILABLE');client=new Client({connection,namespace:'default'});ready=true;}catch{await delay(250);}}if(!ready)throw Error('TEMPORAL_UNAVAILABLE');}catch{console.error('Temporal service unavailable');await shutdown();process.exitCode=1;}
 async function shutdown(){if(closing)return;closing=true;ready=false;server.close();if(active){const job=jobs.get(active);try{await job?.handle?.terminate('SERVICE_SHUTDOWN');}catch{}}for(const child of [...childProcesses])await stopChild(child);await connection?.close();await flush();}
 process.on('SIGTERM',()=>void shutdown().finally(()=>process.exit(0)));process.on('SIGINT',()=>void shutdown().finally(()=>process.exit(0)));
